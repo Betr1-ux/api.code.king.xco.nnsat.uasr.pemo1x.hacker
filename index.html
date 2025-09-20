@@ -5,174 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>KING ADMIN - Codes</title>
   <style>
-    body {
-      margin: 0;
-      font-family: "Cairo", Arial, sans-serif;
-      background: #000;
-      color: #0f0;
-      text-align: center;
-    }
-
-    /* شاشة تسجيل الدخول */
-    #loginScreen {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #000428, #004e92);
-      overflow: hidden;
-    }
-
-    .login-box {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 40px 30px;
-      border-radius: 15px;
-      width: 320px;
-      box-shadow: 0 0 25px rgba(0, 255, 128, 0.5);
-      backdrop-filter: blur(10px);
-      animation: fadeIn 1s ease;
-    }
-
-    .login-box h2 {
-      margin-bottom: 5px;
-      font-size: 26px;
-      font-weight: bold;
-      color: #39ff14;
-    }
-
-    .login-box p {
-      font-size: 14px;
-      color: #ccc;
-      margin-bottom: 20px;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #0f0;
-      background: transparent;
-      color: #0f0;
-      border-radius: 8px;
-      font-size: 16px;
-      text-align: center;
-      outline: none;
-      transition: 0.3s;
-    }
-    .login-box input:focus {
-      border-color: #39ff14;
-      box-shadow: 0 0 8px #39ff14;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #39ff14, #00ff88);
-      color: #000;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .login-box button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 255, 128, 0.5);
-    }
-
-    #error {
-      margin-top: 10px;
-      color: #ff4d4d;
-      display: none;
-      font-weight: bold;
-    }
-
-    /* زر التلجرام */
-    .telegram-btn {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 10px 15px;
-      border-radius: 50px;
-      background: #0088cc;
-      color: #fff;
-      font-size: 14px;
-      font-weight: bold;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-    .telegram-btn:hover {
-      background: #00aaff;
-      box-shadow: 0 0 12px rgba(0, 136, 204, 0.7);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    /* واجهة التطبيق */
-    #mainApp {
-      padding: 20px;
-      color: #fff;
-      background: #111;
-      min-height: 100vh;
-    }
-
-    #mainApp h2 {
-      color: #39ff14;
-    }
-
-    table {
-      margin: 20px auto;
-      border-collapse: collapse;
-      width: 80%;
-      max-width: 600px;
-      background: #000;
-      box-shadow: 0 0 15px rgba(0,255,128,0.3);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    table th, table td {
-      border: 1px solid #39ff14;
-      padding: 10px;
-      text-align: center;
-    }
-
-    table th {
-      background: #222;
-      color: #39ff14;
-    }
-
-    table td {
-      color: #fff;
-    }
-
-    #statusMsg {
-      margin-top: 15px;
-      font-weight: bold;
-    }
+    body { background:#000; color:#0f0; font-family:Arial, sans-serif; margin:0; padding:20px; text-align:center; }
+    input, button { padding:8px; margin:5px; border:none; border-radius:8px; }
+    input { text-align:center; background:transparent; border:1px solid #0f0; color:#0f0; }
+    button { background:#0f0; color:#000; font-weight:bold; cursor:pointer; }
+    button:hover { background:#3f3; }
+    table { border-collapse: collapse; width:100%; margin-top:15px; }
+    th, td { border:1px solid #0f0; padding:6px; text-align:center; }
+    #visitsBox { margin-bottom:15px; font-size:16px; }
+    #statusMsg { margin-top:10px; font-weight:bold; }
   </style>
 </head>
 <body>
 
-<!-- واجهة تسجيل الدخول -->
 <div id="loginScreen">
-  <div class="login-box">
-    <h2>👑 KING ADMIN</h2>
-    <p>تسجيل دخول المسؤول</p>
-    <input id="accessCode" type="password" placeholder="أدخل الكود السري"/>
-    <button id="loginBtn">دخول</button>
-    <div id="error">❌ الكود غير صحيح</div>
-    <a href="https://t.me/Loty122" target="_blank" class="telegram-btn">📩 تواصل عبر التلجرام</a>
-  </div>
+  <h3>تسجيل الدخول</h3>
+  <input id="accessCode" placeholder="أدخل الكود هنا"/>
+  <button id="loginBtn">دخول</button>
+  <div id="error" style="color:#f55; display:none; margin-top:8px;">كود خطأ</div>
 </div>
 
-<!-- واجهة التطبيق -->
 <div id="mainApp" style="display:none;">
-  <h2>مرحبًا كينج 👑</h2>
+  <h2>مرحبًا كينج</h2>
   <div id="visitsBox">
     عدد زياراتك المتبقية اليوم: <span id="visitsLeft">0</span>
   </div>
@@ -323,7 +177,7 @@
 
   // دالة الأكواد بالشكل المطلوب XXXXX-XXXXX-XXXXX-XXXXX
   function randomHex(){
-    const CHARS = "0123456789ABCDEF"; 
+    const CHARS = "0123456789ABCDEF"; // أرقام وحروف من A لـ F
     let parts = [];
     for(let i=0; i<4; i++){
       let seg = "";
