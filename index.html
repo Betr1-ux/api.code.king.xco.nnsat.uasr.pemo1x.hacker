@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KING ADMIN - Codes</title>
+  <style>
+    body { background:#000; color:#0f0; font-family:Arial, sans-serif; margin:0; padding:20px; text-align:center; }
+    input, button { padding:8px; margin:5px; border:none; border-radius:8px; }
+    input { text-align:center; background:transparent; border:1px solid #0f0; color:#0f0; }
+    button { background:#0f0; color:#000; font-weight:bold; cursor:pointer; }
+    button:hover { background:#3f3; }
+    table { border-collapse: collapse; width:100%; margin-top:15px; }
+    th, td { border:1px solid #0f0; padding:6px; text-align:center; }
+    #visitsBox { margin-bottom:15px; font-size:16px; }
+    #statusMsg { margin-top:10px; font-weight:bold; }
+  </style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <h3>تسجيل الدخول</h3>
+  <input id="accessCode" placeholder="أدخل الكود هنا"/>
+  <button id="loginBtn">دخول</button>
+  <div id="error" style="color:#f55; display:none; margin-top:8px;">كود خطأ</div>
+</div>
+
+<div id="mainApp" style="display:none;">
+  <h2>مرحبًا كينج</h2>
+  <div id="visitsBox">
+    عدد زياراتك المتبقية اليوم: <span id="visitsLeft">0</span>
+  </div>
+
+  <label>عدد الأكواد:</label>
+  <input type="number" id="numCodes" value="5" min="1" max="100"><br>
+  <label>عدد الاستخدامات لكل كود:</label>
+  <input type="number" id="uses" value="1" min="1"><br>
+  <button id="genBtn">توليد</button>
+  <button id="clearBtn">مسح الكل</button>
+
+  <h3>الأكواد المتاحة</h3>
+  <table>
+    <thead><tr><th>الكود</th><th>الاستخدامات المتبقية</th></tr></thead>
+    <tbody id="codesTable"></tbody>
+  </table>
+
+  <div id="statusMsg"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, set, get, remove, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+  const CORRECT_CODE = "ASD2025XKASONA22250";
+  const firebaseConfig = {
+    apiKey: "AIzaSyDW4dAASi236YpSrebx7NkMBBNe6_rp5OI",
+    authDomain: "gooa-6c940.firebaseapp.com",
+    databaseURL: "https://gooa-6c940-default-rtdb.firebaseio.com",
+    projectId: "gooa-6c940",
+    storageBucket: "gooa-6c940.firebasestorage.app",
+    messagingSenderId: "844888715239",
+    appId: "1:844888715239:web:936dd5fdac8b46e0479742",
+    measurementId: "G-66CL69F082"
+  };
+
+  const DAILY_VISITS = 100;
+  let db;
+
+  function showStatus(msg, color="lime"){
+    const s = document.getElementById("statusMsg");
+    s.innerText = msg;
+    s.style.color = color;
+  }
+
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    const val = document.getElementById("accessCode").value.trim();
+    if(val !== CORRECT_CODE){
+      document.getElementById("error").style.display = "block";
+      return;
+    }
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+    const app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+    setupListeners();
+    document.getElementById("genBtn").addEventListener("click", generateCodes);
+    document.getElementById("clearBtn").addEventListener("click", clearAll);
+    showStatus("🔄 جاهز");
+  });
+
+  function setupListeners(){
+    onValue(ref(db, "visits"), (snap) => {
+      if(snap.exists()){
+        const v = snap.val();
+        document.getElementById("visitsLeft").innerText = v.visitsLeft ?? DAILY_VISITS;
+      } else {
+        set(ref(db, "visits"), { visitsLeft: DAILY_VISITS, lastReset: Date.now(), usedToday: false })
+          .catch(err=>showStatus("خطأ إنشاء visits", "red"));
+        document.getElementById("visitsLeft").innerText = DAILY_VISITS;
+      }
+    });
+
+    onValue(ref(db, "codes"), (snap) => {
+      const table = document.getElementById("codesTable");
+      table.innerHTML = "";
+      if(snap.exists()){
+        const codes = snap.val();
+        Object.keys(codes).forEach(c => {
+          const row = `<tr><td>${c}</td><td>${codes[c].remaining}</td></tr>`;
+          table.innerHTML += row;
+        });
+      }
+    });
+  }
+
+  async function useVisits(count){
+    try {
+      const res = await runTransaction(ref(db, "visits"), (current) => {
+        if(current === null) {
+          return { visitsLeft: DAILY_VISITS - count, lastReset: Date.now(), usedToday: true };
+        }
+        if(typeof current.visitsLeft === 'undefined') current.visitsLeft = DAILY_VISITS;
+        if(current.visitsLeft >= count){
+          current.visitsLeft = current.visitsLeft - count;
+          return { ...current, usedToday: true, lastReset: Date.now() };
+        }
+        return;
+      });
+      if(!res.committed){
+        showStatus("❌ الزيارات انتهت");
+        return false;
+      }
+      return true;
+    } catch(err){
+      showStatus("خطأ في خصم الزيارات", "red");
+      return false;
+    }
+  }
+
+  async function generateCodes(){
+    const num = parseInt(document.getElementById("numCodes").value) || 0;
+    const uses = parseInt(document.getElementById("uses").value) || 1;
+    if(num <= 0){
+      showStatus("ادخل عدد صحيح للأكواد", "red");
+      return;
+    }
+    const ok = await useVisits(num);
+    if(!ok) return;
+
+    try {
+      const snap = await get(ref(db, "codes"));
+      const existing = new Set(snap.exists() ? Object.keys(snap.val()) : []);
+      const newCodes = [];
+      while(newCodes.length < num){
+        const code = randomHex();
+        if(!existing.has(code)){
+          existing.add(code);
+          newCodes.push(code);
+        }
+      }
+      const promises = newCodes.map(c => set(ref(db, "codes/" + c), { remaining: uses }));
+      await Promise.all(promises);
+      showStatus(`✅ تم توليد ${newCodes.length} كود`);
+    } catch(err){
+      showStatus("خطأ في التوليد", "red");
+    }
+  }
+
+  async function clearAll(){
+    try {
+      await remove(ref(db, "codes"));
+      showStatus("✅ تم مسح الأكواد");
+    } catch(err){
+      showStatus("خطأ في المسح", "red");
+    }
+  }
+
+  // دالة الأكواد بالشكل المطلوب XXXXX-XXXXX-XXXXX-XXXXX
+  function randomHex(){
+    const CHARS = "0123456789ABCDEF"; // أرقام وحروف من A لـ F
+    let parts = [];
+    for(let i=0; i<4; i++){
+      let seg = "";
+      for(let j=0; j<5; j++){
+        seg += CHARS[Math.floor(Math.random()*CHARS.length)];
+      }
+      parts.push(seg);
+    }
+    return parts.join("-");
+  }
+</script>
+
+</body>
+</html>
