@@ -5,28 +5,133 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>KING ADMIN - Codes</title>
   <style>
-    body { background:#000; color:#0f0; font-family:Arial, sans-serif; margin:0; padding:20px; text-align:center; }
-    input, button { padding:8px; margin:5px; border:none; border-radius:8px; }
-    input { text-align:center; background:transparent; border:1px solid #0f0; color:#0f0; }
-    button { background:#0f0; color:#000; font-weight:bold; cursor:pointer; }
+    body {
+      margin:0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color:#0f0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    /* واجهة تسجيل الدخول */
+    #loginScreen {
+      background: rgba(0,0,0,0.7);
+      padding: 30px 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      width: 320px;
+      text-align:center;
+      animation: fadeIn 1s ease;
+    }
+    #loginScreen h2 {
+      color:#0f0;
+      margin-bottom: 20px;
+      letter-spacing:1px;
+    }
+    #loginScreen input {
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #0f0;
+      background:transparent;
+      color:#0f0;
+      text-align:center; /* يخلي الكتابة والـ placeholder في النص بالملي */
+      font-size:15px;
+      margin-bottom:15px;
+      outline:none;
+    }
+    #loginScreen button {
+      width:100%;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      background:#0f0;
+      color:#000;
+      font-weight:bold;
+      font-size:15px;
+      cursor:pointer;
+      transition:0.2s;
+    }
+    #loginScreen button:hover {
+      background:#3f3;
+      transform: scale(1.05);
+    }
+    #error {
+      margin-top:10px;
+      color:#f55;
+      display:none;
+      font-weight:bold;
+    }
+
+    /* أيقونة التليجرام */
+    .telegram-link {
+      display:inline-block;
+      margin-top:15px;
+      transition:0.2s;
+    }
+    .telegram-link img {
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      box-shadow:0 0 8px rgba(0,0,0,0.6);
+    }
+    .telegram-link:hover {
+      transform:scale(1.1);
+    }
+
+    /* التطبيق الأساسي */
+    #mainApp {
+      display:none;
+      padding:20px;
+      width:100%;
+      max-width:900px;
+      margin:auto;
+      color:#0f0;
+    }
+    h2,h3 { text-align:center; }
+
+    input, button {
+      padding:8px; margin:5px; border:none; border-radius:8px;
+    }
+    input {
+      text-align:center; background:transparent; border:1px solid #0f0; color:#0f0;
+    }
+    button {
+      background:#0f0; color:#000; font-weight:bold; cursor:pointer;
+    }
     button:hover { background:#3f3; }
-    table { border-collapse: collapse; width:100%; margin-top:15px; }
-    th, td { border:1px solid #0f0; padding:6px; text-align:center; }
-    #visitsBox { margin-bottom:15px; font-size:16px; }
+    table {
+      border-collapse: collapse; width:100%; margin-top:15px;
+    }
+    th, td {
+      border:1px solid #0f0; padding:6px; text-align:center;
+    }
     #statusMsg { margin-top:10px; font-weight:bold; }
+
+    @keyframes fadeIn {
+      from {opacity:0; transform:translateY(20px);}
+      to {opacity:1; transform:translateY(0);}
+    }
   </style>
 </head>
 <body>
 
 <div id="loginScreen">
-  <h3>تسجيل الدخول</h3>
-  <input id="accessCode" placeholder="أدخل الكود هنا"/>
+  <h2>🔑 تسجيل الدخول</h2>
+  <input id="accessCode" placeholder="أدخل كود الدخول"/>
   <button id="loginBtn">دخول</button>
-  <div id="error" style="color:#f55; display:none; margin-top:8px;">كود خطأ</div>
+  <div id="error">❌ الكود غير صحيح</div>
+
+  <!-- زر التليجرام -->
+  <a href="https://t.me/Loty122" target="_blank" class="telegram-link">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+  </a>
 </div>
 
-<div id="mainApp" style="display:none;">
-  <h2>مرحبًا كينج</h2>
+<div id="mainApp">
+  <h2>مرحبًا كينج 👑</h2>
   <div id="visitsBox">
     عدد زياراتك المتبقية اليوم: <span id="visitsLeft">0</span>
   </div>
@@ -94,8 +199,7 @@
         const v = snap.val();
         document.getElementById("visitsLeft").innerText = v.visitsLeft ?? DAILY_VISITS;
       } else {
-        set(ref(db, "visits"), { visitsLeft: DAILY_VISITS, lastReset: Date.now(), usedToday: false })
-          .catch(err=>showStatus("خطأ إنشاء visits", "red"));
+        set(ref(db, "visits"), { visitsLeft: DAILY_VISITS, lastReset: Date.now(), usedToday: false });
         document.getElementById("visitsLeft").innerText = DAILY_VISITS;
       }
     });
@@ -175,9 +279,8 @@
     }
   }
 
-  // دالة الأكواد بالشكل المطلوب XXXXX-XXXXX-XXXXX-XXXXX
   function randomHex(){
-    const CHARS = "0123456789ABCDEF"; // أرقام وحروف من A لـ F
+    const CHARS = "0123456789ABCDEF";
     let parts = [];
     for(let i=0; i<4; i++){
       let seg = "";
@@ -191,4 +294,4 @@
 </script>
 
 </body>
-  </html>
+</html>
